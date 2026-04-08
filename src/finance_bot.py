@@ -7,10 +7,10 @@ import sys
 class FinanceBot:
     def __init__(self):
         self.project_root = Path(__file__).parent.parent
-        self.user_config = self.get_user_config()
+        self.user_config = self.set_user_config()
         self.working_dir = self.get_working_dir()
 
-    def get_user_config(self):
+    def set_user_config(self):
         project_root = self.project_root
         private_dir = project_root / "private"
         private_dir.mkdir(exist_ok=True)
@@ -22,11 +22,23 @@ class FinanceBot:
             config = json.load(f)
         return config
 
+    def get_user_config_value(self, key):
+        if key not in self.user_config:
+            self.user_config[key] = None
+        return self.user_config[key]
+
+    def set_user_config_value(self, key, value):
+        self.user_config[key] = value
+        user_config_path = self.project_root / "private" / "user_config.json"
+        with user_config_path.open(mode="w") as f:
+            json.dump(self.user_config, f, indent=2)
+
     def get_working_dir(self):
-        if "working_dir" not in self.user_config:
+        working_dir = self.get_user_config_value("working_dir")
+        if working_dir is None:
             working_dir = self.set_directory(Path.home())
             self.set_user_config_value("working_dir", f"{working_dir}")
-        return self.user_config["working_dir"]
+        return working_dir
 
     def set_directory(self, starting_dir):
         current_dir = starting_dir
@@ -59,9 +71,3 @@ class FinanceBot:
                     current_dir = current_dir.parent
             else:
                 current_dir = current_dir / user_input
-
-    def set_user_config_value(self, key, value):
-        self.user_config[key] = value
-        user_config_path = self.project_root / "private" / "user_config.json"
-        with user_config_path.open(mode="w") as f:
-            json.dump(self.user_config, f, indent=2)
