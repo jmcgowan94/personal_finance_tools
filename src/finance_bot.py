@@ -29,9 +29,8 @@ class FinanceBot:
         return self.user_config["working_dir"]
 
     def set_directory(self, starting_dir):
-        filepath_set = False
         current_dir = starting_dir
-        while not filepath_set:
+        while True:
             folders = os.listdir(current_dir)
             options = []
             for item in folders:
@@ -48,14 +47,14 @@ class FinanceBot:
                 f"Current filepath: {current_dir}\n  Continue navigating, or choose 'DONE'",
                 choices=options
             ).ask()
-            if user_input == "EXIT":
+            if user_input == "EXIT" or user_input is None:
                 print("Exiting script.\n")
                 sys.exit()
             elif user_input == "DONE":
                 return current_dir
             elif user_input == "BACK":
                 if current_dir == starting_dir:
-                    pass
+                    print("Already at the starting directory.")
                 else:
                     current_dir = current_dir.parent
             else:
