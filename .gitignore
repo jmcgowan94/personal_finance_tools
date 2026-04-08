@@ -11,3 +11,6 @@ wheels/
 
 # Private
 private/
+
+# Testing
+src/test.py
