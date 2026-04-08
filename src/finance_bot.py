@@ -24,36 +24,42 @@ class FinanceBot:
 
     def get_working_dir(self):
         if "working_dir" not in self.user_config:
-            current_dir = Path.home()
-            filepath_set = False
-            while not filepath_set:
-                folders = os.listdir(current_dir)
-                options = []
-                for item in folders:
-                    item_path = current_dir / item
-                    if item_path.is_dir() and os.access(item_path, os.R_OK | os.W_OK | os.X_OK):
-                        options.append(item)
-                options = [i for i in options if i[0] != "."]
-                options.sort()
-                options.insert(0, "DONE")
-                options.append("BACK")
-                options.append("EXIT")
-                print("")
-                user_input = questionary.select(
-                    f"Current filepath: {current_dir}\n  Continue navigating, or choose 'DONE'",
-                    choices=options
-                ).ask()
-                if user_input == "EXIT":
-                    print("Exiting script.\n")
-                    sys.exit()
-                elif user_input == "DONE":
-                    self.set_user_config_value("working_dir", f"{current_dir}")
-                    filepath_set = True
-                elif user_input == "BACK":
-                    current_dir = current_dir.parent
-                else:
-                    current_dir = current_dir / user_input
+            working_dir = self.set_directory(Path.home())
+            self.set_user_config_value("working_dir", f"{working_dir}")
         return self.user_config["working_dir"]
+
+    def set_directory(self, starting_dir):
+        filepath_set = False
+        current_dir = starting_dir
+        while not filepath_set:
+            folders = os.listdir(current_dir)
+            options = []
+            for item in folders:
+                item_path = current_dir / item
+                if item_path.is_dir() and os.access(item_path, os.R_OK | os.W_OK | os.X_OK):
+                    options.append(item)
+            options = [i for i in options if i[0] != "."]
+            options.sort()
+            options.insert(0, "DONE")
+            options.append("BACK")
+            options.append("EXIT")
+            print("")
+            user_input = questionary.select(
+                f"Current filepath: {current_dir}\n  Continue navigating, or choose 'DONE'",
+                choices=options
+            ).ask()
+            if user_input == "EXIT":
+                print("Exiting script.\n")
+                sys.exit()
+            elif user_input == "DONE":
+                return current_dir
+            elif user_input == "BACK":
+                if current_dir == starting_dir:
+                    pass
+                else:
+                    current_dir = current_dir.parent
+            else:
+                current_dir = current_dir / user_input
 
     def set_user_config_value(self, key, value):
         self.user_config[key] = value
