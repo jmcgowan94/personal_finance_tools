@@ -40,15 +40,15 @@ class FinanceBot:
             working_dir = self.set_directory(Path.home())
             self.set_user_config_value("working_dir", f"{working_dir}")
         else:
-            print(f"Previous Working Directory: {working_dir}")
             user_answer = questionary.select(
-                "Would you like to change the working directory?:",
+                f"Previous Working Directory: {working_dir}\n"
+                f"  Would you like to use the same working directory?:",
                 choices=["YES", "NO", "EXIT"]
             ).ask()
             if user_answer == "EXIT":
                 print("Exiting script.\n")
                 sys.exit()
-            elif user_answer == "YES":
+            elif user_answer == "NO":
                 working_dir = self.set_directory(Path.home())
                 self.set_user_config_value("working_dir", f"{working_dir}")
             else:
@@ -71,7 +71,7 @@ class FinanceBot:
             options.append("EXIT")
             print("")
             user_input = questionary.select(
-                f"Current filepath: {current_dir}\n  Continue navigating, or choose 'DONE'",
+                f"Current filepath: {current_dir}\n  Continue navigating, or choose 'DONE':",
                 choices=options
             ).ask()
             if user_input == "EXIT" or user_input is None:
@@ -86,3 +86,7 @@ class FinanceBot:
                     current_dir = current_dir.parent
             else:
                 current_dir = current_dir / user_input
+
+    # def check_for_new_files(self):
+        # files = os.listdir(self.working_dir)
+        # print(files)
