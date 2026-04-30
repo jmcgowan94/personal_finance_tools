@@ -10,6 +10,7 @@ class FinanceBot:
         self.project_root = Path(__file__).parent.parent
         self.user_config = self.set_user_config()
         self.working_dir = self.get_working_dir()
+        self.processed_files = self.get_processed_files()
 
     def set_user_config(self):
         project_root = self.project_root
@@ -87,6 +88,26 @@ class FinanceBot:
             else:
                 current_dir = current_dir / user_input
 
-    # def check_for_new_files(self):
-        # files = os.listdir(self.working_dir)
-        # print(files)
+    def get_processed_files(self):
+        processed_files = self.get_user_config_value("processed_files")
+        if processed_files is None:
+            processed_files = []
+            self.set_user_config_value("processed_files", processed_files)
+        return processed_files
+
+    def check_for_new_files(self):
+        files = os.listdir(self.working_dir)
+        for f in sorted(files):
+            if f.lower() not in self.processed_files:
+                user_import = questionary.select(
+                    f"Import file: {f}?:",
+                    choices=["YES", "NO", "EXIT"]
+                ).ask()
+                if user_import == "EXIT":
+                    print("Exiting script.\n")
+                    sys.exit()
+                elif user_import == "YES":
+                    self.import_file(f)
+
+    def import_file(self, filename):
+        print(f"Importing: {filename}")
