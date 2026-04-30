@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+from random import choice
 import questionary
 import sys
 
@@ -38,6 +39,20 @@ class FinanceBot:
         if working_dir is None:
             working_dir = self.set_directory(Path.home())
             self.set_user_config_value("working_dir", f"{working_dir}")
+        else:
+            print(f"Previous Working Directory: {working_dir}")
+            user_answer = questionary.select(
+                "Would you like to change the working directory?:",
+                choices=["YES", "NO", "EXIT"]
+            ).ask()
+            if user_answer == "EXIT":
+                print("Exiting script.\n")
+                sys.exit()
+            elif user_answer == "YES":
+                working_dir = self.set_directory(Path.home())
+                self.set_user_config_value("working_dir", f"{working_dir}")
+            else:
+                pass
         return working_dir
 
     def set_directory(self, starting_dir):
