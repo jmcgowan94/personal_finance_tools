@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import questionary
 import sys
+from sys_config import SYS_DELIMITERS
 
 class FinanceBot:
     def __init__(self):
@@ -110,3 +111,11 @@ class FinanceBot:
 
     def import_file(self, filename):
         print(f"Importing: {filename}")
+
+    def detect_delimiter(self, lines):
+        counts = {d: sum(line.count(d) for line in lines) for d in SYS_DELIMITERS}
+        best = max(counts, key=counts.get)
+        # If we found zero delimiters for every candidate, don't guess incorrectly
+        if counts[best] == 0:
+            raise ValueError(f"Could not detect delimiter from sample. Counts={counts}")
+        return best
