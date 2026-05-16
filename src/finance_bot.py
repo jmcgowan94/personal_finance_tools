@@ -1,16 +1,39 @@
 import json
 import os
 from pathlib import Path
-import questionary
+import sqlite3
 import sys
+
+import questionary
+
 from sys_config import SYS_DELIMITERS
 
 class FinanceBot:
     def __init__(self):
         self.project_root = Path(__file__).parent.parent
+        self.user_config = None
+        self.working_dir = None
+        self.data = None
+        self.processed_files = None
+        self.initialize()
+
+    def initialize(self):
+        print("\n-- Initializing --")
+        total_steps = 3
+        current_step = 1
+        print(f"\n-- ({current_step}/{total_steps}) Setting user config --")
         self.user_config = self.set_user_config()
+        current_step += 1
+        print("Complete.")
+        print(f"\n-- ({current_step}/{total_steps}) Setting working directory --")
         self.working_dir = self.get_working_dir()
-        self.processed_files = self.get_processed_files()
+        print(f"Selected Working Directory: {self.working_dir}")
+        current_step += 1
+        print("Complete.")
+        print(f"\n-- ({current_step}/{total_steps}) Validating database --")
+        self.data = self.validate_database()
+        current_step += 1
+        print("Complete.")
 
     def set_user_config(self):
         project_root = self.project_root
@@ -87,6 +110,36 @@ class FinanceBot:
                     current_dir = current_dir.parent
             else:
                 current_dir = current_dir / user_input
+
+    def validate_database(self, ):
+        data_dir = self.project_root / "data"
+        if data_dir.exists():
+            pass
+        else:
+            Path("data").mkdir()
+            print(f"Created data directory at: {data_dir}")
+        db_raw = data_dir / "data.db"
+        if db_raw.exists():
+            print(f"Validated database at: {db_raw}")
+        else:
+            conn = sqlite3.connect(db_raw)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS transactions_raw (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    source_file TEXT NOT NULL,
+                    cred_or_debit TEXT NOT NULL,
+                    posting_date TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    type TEXT NOT NULL,
+                    check_slip_no TEXT,
+                    amount REAL NOT NULL,
+                    balance REAL NOT NULL
+                )
+            """)
+            conn.commit()
+            conn.close()
+            print(f"Created database at: {db_raw}")
 
     def get_processed_files(self):
         processed_files = self.get_user_config_value("processed_files")
