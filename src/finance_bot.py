@@ -113,17 +113,16 @@ class FinanceBot:
 
     def validate_database(self):
         data_dir = self.project_root / "data"
-        if data_dir.exists():
-            pass
-        else:
-            Path("data").mkdir()
-            print(f"Created data directory at: {data_dir}")
-        db_raw = data_dir / "data.db"
-        if db_raw.exists():
-            print(f"Validated database at: {db_raw}")
-        else:
-            conn = sqlite3.connect(db_raw)
-            conn.execute("""
+        data_dir.mkdir(parents=True, exist_ok=True)
+        db_path = data_dir / "data.db"
+        existed = db_path.exists()
+        conn = sqlite3.connect(db_path)
+        print(f"{'Validated' if existed else 'Created'} database at: {db_path}")
+        return conn
+
+    def validate_transactions_raw(self):
+        conn = sqlite3.connect(self.data)
+        conn.execute("""
                 CREATE TABLE IF NOT EXISTS transactions_raw (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -136,10 +135,9 @@ class FinanceBot:
                     amount REAL NOT NULL,
                     balance REAL NOT NULL
                 )
-            """)
-            conn.commit()
-            conn.close()
-            print(f"Created database at: {db_raw}")
+        """)
+        conn.commit()
+        conn.close()
 
     def get_processed_files(self):
         processed_files = self.get_user_config_value("processed_files")
