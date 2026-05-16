@@ -1,5 +1,6 @@
 import json
 import math
+from multiprocessing import Value
 import os
 from pathlib import Path
 import sqlite3
@@ -193,14 +194,13 @@ class FinanceBot:
                 elif user_import == "YES":
                     self.import_file(f)
 
-    def import_file(self, filename):
-        print(f"    Importing: {filename}", end=" ", flush=True)
-        print("done.")
-
     def detect_delimiter(self, lines):
         counts = {d: sum(line.count(d) for line in lines) for d in SYS_DELIMITERS}
         best = max(counts, key=counts.get)
-        # If we found zero delimiters for every candidate, don't guess incorrectly
         if counts[best] == 0:
-            raise ValueError(f"Could not detect delimiter from sample. Counts={counts}")
+            raise ValueError(f"Count not detect delimiter from sample. Counts={counts}")
         return best
+
+    def import_file(self, filename):
+        print(f"    Importing: {filename}", end=" ", flush=True)
+        print("done.")
