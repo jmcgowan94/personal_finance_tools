@@ -23,12 +23,12 @@ class FinanceBot:
         print("\n-- Initializing --")
         total_steps = 3
         current_step = 1
-        print(f"\n-- ({current_step}/{total_steps}) Setting user config --")
+        print(f"\n-- ({current_step}/{total_steps}) Validating user config --")
         self.user_dir_path.mkdir(parents=True, exist_ok=True)
         self.user_config = self.set_user_config()
         current_step += 1
         print("Complete.")
-        print(f"\n-- ({current_step}/{total_steps}) Setting working directory --")
+        print(f"\n-- ({current_step}/{total_steps}) Validating working directory --")
         self.working_dir = self.get_working_dir()
         print(f"Selected Working Directory: {self.working_dir}")
         current_step += 1
@@ -46,10 +46,8 @@ class FinanceBot:
             config = json.load(f)
         return config
 
-    def get_user_config_value(self, key):
-        if key not in self.user_config:
-            self.user_config[key] = None
-        return self.user_config[key]
+    def get_user_config_value(self, key, default=None):
+        return self.user_config.get(key, default)
 
     def set_user_config_value(self, key, value):
         self.user_config[key] = value
@@ -110,9 +108,7 @@ class FinanceBot:
                 current_dir = current_dir / user_input
 
     def validate_database(self):
-        data_dir = self.project_root / "data"
-        data_dir.mkdir(parents=True, exist_ok=True)
-        db_path = data_dir / "data.db"
+        db_path = self.user_dir_path / "data.db"
         existed = db_path.exists()
         conn = sqlite3.connect(db_path)
         print(f"{'Validated' if existed else 'Created'} database at: {db_path}")
