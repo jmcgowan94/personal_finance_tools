@@ -15,25 +15,25 @@ class FinanceBot:
         self.user_config_path = self.user_dir_path / "user_config.json"
         self.user_config = None
         self.working_dir = None
-        self.db_conn = None
+        self.db_path = None
         self.processed_files = None
         self.initialize()
 
     def initialize(self):
-        print("\n-- Initializing --")
+        print("\n-------- Initializing --------")
         total_steps = 3
         current_step = 1
-        print(f"\n-- ({current_step}/{total_steps}) Validating user config --")
+        print(f"\n-- Validating user config ({current_step}/{total_steps}) --")
         self.user_dir_path.mkdir(parents=True, exist_ok=True)
         self.user_config = self.set_user_config()
         current_step += 1
         print("Complete.")
-        print(f"\n-- ({current_step}/{total_steps}) Validating working directory --")
+        print(f"\n-- Validating working directory ({current_step}/{total_steps}) --")
         self.working_dir = self.get_working_dir()
         print(f"Selected Working Directory: {self.working_dir}")
         current_step += 1
         print("Complete.")
-        print(f"\n-- ({current_step}/{total_steps}) Validating database --")
+        print(f"\n-- Validating database ({current_step}/{total_steps}) --")
         self.db_conn = self.validate_database()
         current_step += 1
         print("Complete.")
@@ -108,14 +108,14 @@ class FinanceBot:
                 current_dir = current_dir / user_input
 
     def validate_database(self):
-        db_path = self.user_dir_path / "data.db"
-        existed = db_path.exists()
-        conn = sqlite3.connect(db_path)
-        print(f"{'Validated' if existed else 'Created'} database at: {db_path}")
+        self.db_path = self.user_dir_path / "data.db"
+        existed = self.db_path.exists()
+        conn = sqlite3.connect(self.db_path)
+        print(f"{'Validated' if existed else 'Created'} database at: {self.db_path}")
         return conn
 
     def validate_transactions_raw(self):
-        conn = sqlite3.connect(self.data)
+        conn = sqlite3.connect(self.db_path)
         conn.execute("""
                 CREATE TABLE IF NOT EXISTS transactions_raw (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
