@@ -83,7 +83,7 @@ class FinanceBot:
         return selected_dir
 
     def set_directory(self, starting_dir):
-        current_dir = starting_dir
+        current_dir = Path(starting_dir)
         while True:
             folders = os.listdir(current_dir)
             options = []
@@ -130,6 +130,9 @@ class FinanceBot:
         current_step += 1
         print("Complete.")
         print(f"\n---- Checking for statements ({current_step}/{total_steps}) ----")
+        self.check_directory(self.working_dir, "statements_dir")
+        current_step += 1
+        print("Complete.")
 
     def validate_transactions_raw(self):
         table_name = "transactions_raw"
