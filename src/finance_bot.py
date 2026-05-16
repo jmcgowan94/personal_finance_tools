@@ -11,9 +11,11 @@ from sys_config import SYS_DELIMITERS
 class FinanceBot:
     def __init__(self):
         self.project_root = Path(__file__).parent.parent
+        self.user_dir_path = self.project_root / "user_data"
+        self.user_config_path = self.user_dir_path / "user_config.json"
         self.user_config = None
         self.working_dir = None
-        self.data = None
+        self.db_conn = None
         self.processed_files = None
         self.initialize()
 
@@ -22,6 +24,7 @@ class FinanceBot:
         total_steps = 3
         current_step = 1
         print(f"\n-- ({current_step}/{total_steps}) Setting user config --")
+        self.user_dir_path.mkdir(parents=True, exist_ok=True)
         self.user_config = self.set_user_config()
         current_step += 1
         print("Complete.")
@@ -31,19 +34,15 @@ class FinanceBot:
         current_step += 1
         print("Complete.")
         print(f"\n-- ({current_step}/{total_steps}) Validating database --")
-        self.data = self.validate_database()
+        self.db_conn = self.validate_database()
         current_step += 1
         print("Complete.")
 
     def set_user_config(self):
-        project_root = self.project_root
-        private_dir = project_root / "private"
-        private_dir.mkdir(exist_ok=True)
-        config_file = private_dir / "user_config.json"
-        if not config_file.exists():
-            with config_file.open(mode="w") as f:
+        if not self.user_config_path.exists():
+            with self.user_config_path.open(mode="w") as f:
                 json.dump({}, f)
-        with config_file.open(mode="r") as f:
+        with self.user_config_path.open(mode="r") as f:
             config = json.load(f)
         return config
 
@@ -54,8 +53,7 @@ class FinanceBot:
 
     def set_user_config_value(self, key, value):
         self.user_config[key] = value
-        user_config_path = self.project_root / "private" / "user_config.json"
-        with user_config_path.open(mode="w") as f:
+        with self.user_config_path.open(mode="w") as f:
             json.dump(self.user_config, f, indent=2)
 
     def get_working_dir(self):
