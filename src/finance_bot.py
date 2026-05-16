@@ -111,7 +111,7 @@ class FinanceBot:
             else:
                 current_dir = current_dir / user_input
 
-    def validate_database(self, ):
+    def validate_database(self):
         data_dir = self.project_root / "data"
         if data_dir.exists():
             pass
