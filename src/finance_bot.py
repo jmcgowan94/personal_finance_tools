@@ -36,7 +36,7 @@ class FinanceBot:
         current_step += 1
         print("Complete.")
         print(f"\n---- Validating Database ({current_step}/{total_steps}) ----")
-        self.db_conn = self.validate_database()
+        self.validate_database()
         current_step += 1
         print("Complete.")
 
@@ -117,9 +117,8 @@ class FinanceBot:
     def validate_database(self):
         self.db_path = self.user_dir_path / "data.db"
         existed = self.db_path.exists()
-        conn = sqlite3.connect(self.db_path)
+        sqlite3.connect(self.db_path)
         print(f"{'Validated' if existed else 'Created'} database at: {self.db_path}")
-        return conn
 
     def import_new_data(self):
         self.print_header("Importing Data", 100)
@@ -161,7 +160,7 @@ class FinanceBot:
             """)
             conn.commit()
             conn.close()
-        print(f"{'Found' if table_exists else 'Created'} table: {table_name}")
+        print(f"{'Validated' if table_exists else 'Created'} table: {table_name}")
 
     def get_processed_files(self):
         processed_files = self.get_user_config_value("processed_files")
@@ -171,7 +170,7 @@ class FinanceBot:
         return processed_files
 
     def check_for_new_files(self):
-        files = os.listdir(self.working_dir)
+        files = os.listdir(self.statements_dir)
         for f in sorted(files):
             if f.lower() not in self.processed_files:
                 user_import = questionary.select(
