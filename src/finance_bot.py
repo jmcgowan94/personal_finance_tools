@@ -25,17 +25,17 @@ class FinanceBot:
         self.print_header("Initializing", 100)
         total_steps = 3
         current_step = 1
-        print(f"\n---- Validating user config ({current_step}/{total_steps}) ----")
+        print(f"\n---- Validating User Config ({current_step}/{total_steps}) ----")
         self.user_dir_path.mkdir(parents=True, exist_ok=True)
         self.user_config = self.set_user_config()
         current_step += 1
         print("Complete.")
-        print(f"\n---- Validating working directory ({current_step}/{total_steps}) ----")
+        print(f"\n---- Validating Working Directory ({current_step}/{total_steps}) ----")
         self.working_dir = self.check_directory(Path.home(), "working_dir")
         print(f"Selected Working Directory: {self.working_dir}")
         current_step += 1
         print("Complete.")
-        print(f"\n---- Validating database ({current_step}/{total_steps}) ----")
+        print(f"\n---- Validating Database ({current_step}/{total_steps}) ----")
         self.db_conn = self.validate_database()
         current_step += 1
         print("Complete.")
@@ -61,10 +61,10 @@ class FinanceBot:
         with self.user_config_path.open(mode="w") as f:
             json.dump(self.user_config, f, indent=2)
 
-    def check_directory(self, start_dir, dir_nam):
+    def check_directory(self, starting_dir, dir_nam):
         selected_dir = self.get_user_config_value(dir_nam)
         if selected_dir is None:
-            selected_dir = self.set_directory(start_dir)
+            selected_dir = self.set_directory(starting_dir)
             self.set_user_config_value(dir_nam, f"{selected_dir}")
         else:
             user_answer = questionary.select(
@@ -76,7 +76,7 @@ class FinanceBot:
                 print("Exiting script.\n")
                 sys.exit()
             elif user_answer == "NO":
-                selected_dir = self.set_directory(start_dir)
+                selected_dir = self.set_directory(starting_dir)
                 self.set_user_config_value(dir_nam, f"{selected_dir}")
             else:
                 pass
