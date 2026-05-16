@@ -20,7 +20,7 @@ class FinanceBot:
         self.initialize()
 
     def initialize(self):
-        print("\n-------- Initializing --------")
+        print("\n              -------- Initializing --------")
         total_steps = 3
         current_step = 1
         print(f"\n-- Validating user config ({current_step}/{total_steps}) --")
@@ -37,6 +37,7 @@ class FinanceBot:
         self.db_conn = self.validate_database()
         current_step += 1
         print("Complete.")
+        print("\n          -------- Initialization Complete --------")
 
     def set_user_config(self):
         if not self.user_config_path.exists():
@@ -114,24 +115,43 @@ class FinanceBot:
         print(f"{'Validated' if existed else 'Created'} database at: {self.db_path}")
         return conn
 
+    def import_new_data(self):
+        print("\n              -------- Importing Data --------")
+        total_steps = 3
+        current_step = 1
+        print(f"\n-- Connecting to database ({current_step}/{total_steps}) --")
+        self.validate_transactions_raw()
+        print("Complete.")
+
+
     def validate_transactions_raw(self):
+        table_name = "transactions_raw"
         conn = sqlite3.connect(self.db_path)
-        conn.execute("""
-                CREATE TABLE IF NOT EXISTS transactions_raw (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    source_file TEXT NOT NULL,
-                    cred_or_debit TEXT NOT NULL,
-                    posting_date TEXT NOT NULL,
-                    description TEXT NOT NULL,
-                    type TEXT NOT NULL,
-                    check_slip_no TEXT,
-                    amount REAL NOT NULL,
-                    balance REAL NOT NULL
-                )
-        """)
-        conn.commit()
-        conn.close()
+        cursor = conn.execute(f"""
+                    SELECT name FROM sqlite_master 
+                    WHERE type='table' AND name='{table_name}'
+                """)
+        table_exists = cursor.fetchone() is not None
+        if table_exists:
+            pass
+        else:
+            conn.execute(f"""
+                    CREATE TABLE IF NOT EXISTS {table_name} (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        source_file TEXT NOT NULL,
+                        cred_or_debit TEXT NOT NULL,
+                        posting_date TEXT NOT NULL,
+                        description TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        check_slip_no TEXT,
+                        amount REAL NOT NULL,
+                        balance REAL NOT NULL
+                    )
+            """)
+            conn.commit()
+            conn.close()
+        print(f"{'Found' if table_exists else 'Created'} table: {table_name}")
 
     def get_processed_files(self):
         processed_files = self.get_user_config_value("processed_files")
@@ -154,7 +174,7 @@ class FinanceBot:
                 elif user_import == "YES":
                     self.import_file(f)
 
-    def import_file(self, filename):
+    def import_files(self, filename):
         print(f"Importing: {filename}")
 
     def detect_delimiter(self, lines):
