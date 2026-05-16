@@ -1,4 +1,5 @@
 import json
+import math
 import os
 from pathlib import Path
 import sqlite3
@@ -20,24 +21,28 @@ class FinanceBot:
         self.initialize()
 
     def initialize(self):
-        print("\n              -------- Initializing --------")
+        self.print_header("Initializing", 100)
         total_steps = 3
         current_step = 1
-        print(f"\n-- Validating user config ({current_step}/{total_steps}) --")
+        print(f"\n---- Validating user config ({current_step}/{total_steps}) ----")
         self.user_dir_path.mkdir(parents=True, exist_ok=True)
         self.user_config = self.set_user_config()
         current_step += 1
         print("Complete.")
-        print(f"\n-- Validating working directory ({current_step}/{total_steps}) --")
+        print(f"\n---- Validating working directory ({current_step}/{total_steps}) ----")
         self.working_dir = self.get_working_dir()
         print(f"Selected Working Directory: {self.working_dir}")
         current_step += 1
         print("Complete.")
-        print(f"\n-- Validating database ({current_step}/{total_steps}) --")
+        print(f"\n---- Validating database ({current_step}/{total_steps}) ----")
         self.db_conn = self.validate_database()
         current_step += 1
         print("Complete.")
-        print("\n          -------- Initialization Complete --------")
+
+    def print_header(self, text, char_num):
+        act_char_num = char_num - 2
+        num_dashes = math.floor((act_char_num - len(text))/2)
+        print(f"\n{'-' * num_dashes} {text} {'-' * num_dashes}")
 
     def set_user_config(self):
         if not self.user_config_path.exists():
@@ -116,13 +121,13 @@ class FinanceBot:
         return conn
 
     def import_new_data(self):
-        print("\n              -------- Importing Data --------")
+        self.print_header("Importing Data", 100)
         total_steps = 3
         current_step = 1
-        print(f"\n-- Connecting to database ({current_step}/{total_steps}) --")
+        print(f"\n---- Connecting to database ({current_step}/{total_steps}) ----")
         self.validate_transactions_raw()
+        current_step += 1
         print("Complete.")
-
 
     def validate_transactions_raw(self):
         table_name = "transactions_raw"
