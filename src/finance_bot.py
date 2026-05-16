@@ -18,7 +18,7 @@ class FinanceBot:
         self.working_dir = None
         self.statements_dir = None
         self.db_path = None
-        self.processed_files = None
+        self.processed_files = ["chase3865_activity_20260131.csv"]
         self.initialize()
 
     def initialize(self):
@@ -124,12 +124,13 @@ class FinanceBot:
         self.print_header("Importing Data", 100)
         total_steps = 3
         current_step = 1
-        print(f"\n---- Connecting to database ({current_step}/{total_steps}) ----")
+        print(f"\n---- Connecting to Database ({current_step}/{total_steps}) ----")
         self.validate_transactions_raw()
         current_step += 1
         print("Complete.")
-        print(f"\n---- Checking for statements ({current_step}/{total_steps}) ----")
-        self.check_directory(self.working_dir, "statements_dir")
+        print(f"\n---- Checking for New Statements ({current_step}/{total_steps}) ----")
+        self.statements_dir = self.check_directory(self.working_dir, "statements_dir")
+        self.check_for_new_files()
         current_step += 1
         print("Complete.")
 
@@ -170,7 +171,16 @@ class FinanceBot:
         return processed_files
 
     def check_for_new_files(self):
+        print("\nLooking for new files...\n")
         files = os.listdir(self.statements_dir)
+        delimited_files = (".csv", ".dat", "tsv", ".txt")
+        excel_files = (".xls", ".xlsx")
+        files = [
+            f
+            for f in files
+            if f.lower().endswith(delimited_files) or
+            f.lower().endswith(excel_files)
+        ]
         for f in sorted(files):
             if f.lower() not in self.processed_files:
                 user_import = questionary.select(
@@ -183,8 +193,9 @@ class FinanceBot:
                 elif user_import == "YES":
                     self.import_file(f)
 
-    def import_files(self, filename):
-        print(f"Importing: {filename}")
+    def import_file(self, filename):
+        print(f"    Importing: {filename}", end=" ", flush=True)
+        print("done.")
 
     def detect_delimiter(self, lines):
         counts = {d: sum(line.count(d) for line in lines) for d in SYS_DELIMITERS}
