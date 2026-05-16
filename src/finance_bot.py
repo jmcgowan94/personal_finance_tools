@@ -16,6 +16,7 @@ class FinanceBot:
         self.user_config_path = self.user_dir_path / "user_config.json"
         self.user_config = None
         self.working_dir = None
+        self.statements_dir = None
         self.db_path = None
         self.processed_files = None
         self.initialize()
@@ -30,7 +31,7 @@ class FinanceBot:
         current_step += 1
         print("Complete.")
         print(f"\n---- Validating working directory ({current_step}/{total_steps}) ----")
-        self.working_dir = self.get_working_dir()
+        self.working_dir = self.check_directory(Path.home(), "working_dir")
         print(f"Selected Working Directory: {self.working_dir}")
         current_step += 1
         print("Complete.")
@@ -60,26 +61,26 @@ class FinanceBot:
         with self.user_config_path.open(mode="w") as f:
             json.dump(self.user_config, f, indent=2)
 
-    def get_working_dir(self):
-        working_dir = self.get_user_config_value("working_dir")
-        if working_dir is None:
-            working_dir = self.set_directory(Path.home())
-            self.set_user_config_value("working_dir", f"{working_dir}")
+    def check_directory(self, start_dir, dir_nam):
+        selected_dir = self.get_user_config_value(dir_nam)
+        if selected_dir is None:
+            selected_dir = self.set_directory(start_dir)
+            self.set_user_config_value(dir_nam, f"{selected_dir}")
         else:
             user_answer = questionary.select(
-                f"Previous Working Directory: {working_dir}\n"
-                f"  Would you like to use the same working directory?:",
+                f"Previous Directory: {selected_dir}\n"
+                f"  Would you like to use the same directory?:",
                 choices=["YES", "NO", "EXIT"]
             ).ask()
             if user_answer == "EXIT":
                 print("Exiting script.\n")
                 sys.exit()
             elif user_answer == "NO":
-                working_dir = self.set_directory(Path.home())
-                self.set_user_config_value("working_dir", f"{working_dir}")
+                selected_dir = self.set_directory(start_dir)
+                self.set_user_config_value(dir_nam, f"{selected_dir}")
             else:
                 pass
-        return working_dir
+        return selected_dir
 
     def set_directory(self, starting_dir):
         current_dir = starting_dir
@@ -128,6 +129,7 @@ class FinanceBot:
         self.validate_transactions_raw()
         current_step += 1
         print("Complete.")
+        print(f"\n---- Checking for statements ({current_step}/{total_steps}) ----")
 
     def validate_transactions_raw(self):
         table_name = "transactions_raw"
